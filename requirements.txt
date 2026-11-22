@@ -1,0 +1,13 @@
+# Python 3.13.18 (Google Colab)
+pandas==2.2.3
+numpy==2.4.6
+requests==2.32.4
+yfinance==0.2.66
+beautifulsoup4==4.13.5
+xlrd==2.0.2
+openpyxl==3.1.5
+scipy==1.16.3
+statsmodels==0.15.0
+linearmodels==7.1
+matplotlib==3.10.0
+python-dotenv>=1.0  # opcional: carga el archivo .env al ejecutar fuera de Colab
