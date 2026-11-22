@@ -1,0 +1,21 @@
+variable,unidad,estadistico,p_valor
+rend10a,Chile,-2.2288,0.196
+rend10a,Colombia,-2.2318,0.1949
+rend10a,Mexico,-2.2308,0.1953
+rend10a,Peru,-3.3756,0.0118
+rend10a,Panel (Fisher-ADF),18.6732,0.0167
+crp,Chile,-2.6797,0.0776
+crp,Colombia,-2.267,0.1828
+crp,Mexico,-2.3093,0.169
+crp,Peru,-2.0437,0.2678
+crp,Panel (Fisher-ADF),14.7017,0.0652
+inflacion,Chile,-2.7854,0.0604
+inflacion,Colombia,-2.2241,0.1976
+inflacion,Mexico,-2.5555,0.1026
+inflacion,Peru,-2.568,0.0998
+inflacion,Panel (Fisher-ADF),18.0207,0.0211
+depreciacion,Chile,-3.3266,0.0137
+depreciacion,Colombia,-2.906,0.0447
+depreciacion,Mexico,-3.2368,0.0179
+depreciacion,Peru,-2.0764,0.2541
+depreciacion,Panel (Fisher-ADF),25.5743,0.0012

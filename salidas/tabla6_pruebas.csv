@@ -1,0 +1,6 @@
+prueba,estadistico,p_valor,h0
+LM Breusch-Pagan (efectos por país),4582.612791,0.0,Sin efecto por país
+F efectos individuales,143.163289,0.0,Sin efectos por país
+Breusch-Pagan (heterocedasticidad),76.519195,0.0,Homocedasticidad
+Wooldridge AR(1),144.208597,0.0,Sin autocorrelación
+Pesaran CD,19.836943,0.0,Independencia entre países

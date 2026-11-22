@@ -1,0 +1,146 @@
+
+==============================================================================
+MCO agrupado
+==============================================================================
+                          PooledOLS Estimation Summary                          
+================================================================================
+Dep. Variable:                rend10a   R-squared:                        0.4071
+Estimator:                  PooledOLS   R-squared (Between):              0.7458
+No. Observations:                1004   R-squared (Within):               0.1243
+Date:                Sat, Nov 21 2026   R-squared (Overall):              0.4071
+Time:                        18:09:20   Log-likelihood                   -1873.2
+Cov. Estimator:                Robust                                           
+                                        F-statistic:                      228.84
+Entities:                           4   P-value                           0.0000
+Avg Obs:                       251.00   Distribution:                  F(3,1000)
+Min Obs:                       248.00                                           
+Max Obs:                       252.00   F-statistic (robust):             248.00
+                                        P-value                           0.0000
+Time periods:                     252   Distribution:                  F(3,1000)
+Avg Obs:                       3.9841                                           
+Min Obs:                       3.0000                                           
+Max Obs:                       4.0000                                           
+                                                                                
+                              Parameter Estimates                               
+================================================================================
+              Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+const            3.0037     0.1339     22.429     0.0000      2.7409      3.2665
+crp              1.0663     0.0591     18.048     0.0000      0.9503      1.1822
+inflacion        0.4499     0.0266     16.906     0.0000      0.3977      0.5021
+depreciacion    -0.0173     0.0043    -4.0096     0.0001     -0.0258     -0.0089
+================================================================================
+
+==============================================================================
+Efectos fijos
+==============================================================================
+                          PanelOLS Estimation Summary                           
+================================================================================
+Dep. Variable:                rend10a   R-squared:                        0.2403
+Estimator:                   PanelOLS   R-squared (Between):              0.3260
+No. Observations:                1004   R-squared (Within):               0.2403
+Date:                Sat, Nov 21 2026   R-squared (Overall):              0.2791
+Time:                        18:09:20   Log-likelihood                   -1693.4
+Cov. Estimator:                Robust                                           
+                                        F-statistic:                      105.10
+Entities:                           4   P-value                           0.0000
+Avg Obs:                       251.00   Distribution:                   F(3,997)
+Min Obs:                       248.00                                           
+Max Obs:                       252.00   F-statistic (robust):             121.16
+                                        P-value                           0.0000
+Time periods:                     252   Distribution:                   F(3,997)
+Avg Obs:                       3.9841                                           
+Min Obs:                       3.0000                                           
+Max Obs:                       4.0000                                           
+                                                                                
+                              Parameter Estimates                               
+================================================================================
+              Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+const            5.1527     0.1621     31.784     0.0000      4.8346      5.4708
+crp              0.2018     0.0697     2.8956     0.0039      0.0650      0.3385
+inflacion        0.3437     0.0203     16.933     0.0000      0.3039      0.3835
+depreciacion    -0.0212     0.0037    -5.7508     0.0000     -0.0284     -0.0140
+================================================================================
+
+F-test for Poolability: 143.16
+P-value: 0.0000
+Distribution: F(3,997)
+
+Included effects: Entity
+
+==============================================================================
+EF Driscoll-Kraay
+==============================================================================
+                          PanelOLS Estimation Summary                           
+================================================================================
+Dep. Variable:                rend10a   R-squared:                        0.2403
+Estimator:                   PanelOLS   R-squared (Between):              0.3260
+No. Observations:                1004   R-squared (Within):               0.2403
+Date:                Sat, Nov 21 2026   R-squared (Overall):              0.2791
+Time:                        18:09:20   Log-likelihood                   -1693.4
+Cov. Estimator:        Driscoll-Kraay                                           
+                                        F-statistic:                      105.10
+Entities:                           4   P-value                           0.0000
+Avg Obs:                       251.00   Distribution:                   F(3,997)
+Min Obs:                       248.00                                           
+Max Obs:                       252.00   F-statistic (robust):             28.492
+                                        P-value                           0.0000
+Time periods:                     252   Distribution:                   F(3,997)
+Avg Obs:                       3.9841                                           
+Min Obs:                       3.0000                                           
+Max Obs:                       4.0000                                           
+                                                                                
+                              Parameter Estimates                               
+================================================================================
+              Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+const            5.1527     0.4751     10.845     0.0000      4.2204      6.0850
+crp              0.2018     0.1961     1.0287     0.3039     -0.1831      0.5867
+inflacion        0.3437     0.0401     8.5691     0.0000      0.2650      0.4224
+depreciacion    -0.0212     0.0088    -2.4028     0.0165     -0.0385     -0.0039
+================================================================================
+
+F-test for Poolability: 143.16
+P-value: 0.0000
+Distribution: F(3,997)
+
+Included effects: Entity
+
+==============================================================================
+EF D-K sin imputados
+==============================================================================
+                          PanelOLS Estimation Summary                           
+================================================================================
+Dep. Variable:                rend10a   R-squared:                        0.2398
+Estimator:                   PanelOLS   R-squared (Between):              0.3089
+No. Observations:                 943   R-squared (Within):               0.2398
+Date:                Sat, Nov 21 2026   R-squared (Overall):              0.2729
+Time:                        18:09:20   Log-likelihood                   -1598.9
+Cov. Estimator:        Driscoll-Kraay                                           
+                                        F-statistic:                      98.429
+Entities:                           4   P-value                           0.0000
+Avg Obs:                       235.75   Distribution:                   F(3,936)
+Min Obs:                       191.00                                           
+Max Obs:                       252.00   F-statistic (robust):             26.589
+                                        P-value                           0.0000
+Time periods:                     252   Distribution:                   F(3,936)
+Avg Obs:                       3.7421                                           
+Min Obs:                       3.0000                                           
+Max Obs:                       4.0000                                           
+                                                                                
+                              Parameter Estimates                               
+================================================================================
+              Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+const            5.1968     0.4907     10.591     0.0000      4.2338      6.1597
+crp              0.1807     0.2003     0.9024     0.3671     -0.2123      0.5738
+inflacion        0.3411     0.0405     8.4213     0.0000      0.2616      0.4206
+depreciacion    -0.0216     0.0091    -2.3641     0.0183     -0.0396     -0.0037
+================================================================================
+
+F-test for Poolability: 142.78
+P-value: 0.0000
+Distribution: F(3,936)
+
+Included effects: Entity
