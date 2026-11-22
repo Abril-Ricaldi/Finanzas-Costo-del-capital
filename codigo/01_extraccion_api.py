@@ -1,3 +1,7 @@
+# Nombres y apellidos: Abril Shantal Ricaldi Bravo
+# Código de matrícula: 2024200519L
+# Tema N.º 64 del temario: Costo del capital en mercados emergentes: Perú, Chile, Colombia y México
+# Fecha de extracción: 19/11/2026
 """
 01_extraccion_api.py
 Proyecto : Costo del capital en mercados emergentes: Perú, Chile, Colombia y México

@@ -1,0 +1,338 @@
+# Nombres y apellidos: Abril Shantal Ricaldi Bravo
+# Código de matrícula: 2024200519L
+# Tema N.º 64 del temario: Costo del capital en mercados emergentes: Perú, Chile, Colombia y México
+# Fecha de extracción: 19/11/2026 (API) y 21/11/2026 (scraping)
+"""
+04_analisis.py
+Proyecto : Costo del capital en mercados emergentes: Perú, Chile, Colombia y México
+Autora   : Abril Shantal Ricaldi Bravo · Código 2024200519L
+Curso    : Finanzas I (055D) · UNCP · 2026-II · Tema 64
+
+Modelo: rend10a_it = a_i + b1*crp_it + b2*inflacion_it + b3*depreciacion_it + e_it
+Signos esperados: b1 > 0, b2 > 0, b3 > 0.
+
+Genera en /salidas: estadísticos descriptivos, correlaciones, VIF, pruebas de
+raíz unitaria, estimaciones (MCO agrupado, efectos fijos, EF con errores
+Driscoll-Kraay y robustez sin meses imputados), pruebas de especificación y
+diagnóstico, y figuras.
+
+Nota metodológica: el modelo de efectos aleatorios y la prueba de Hausman no
+son estimables, porque con 4 países y 4 parámetros (constante + 3 regresores)
+la regresión "between" no tiene grados de libertad. Se usan la prueba F y el
+LM de Breusch-Pagan para elegir entre MCO agrupado y efectos por país.
+"""
+
+import sys
+import warnings
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import statsmodels
+import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.stats.diagnostic import het_breuschpagan
+from statsmodels.tsa.stattools import adfuller
+from scipy import stats
+import linearmodels
+from linearmodels.panel import PooledOLS, PanelOLS
+
+warnings.filterwarnings('ignore')
+
+# ------------------------------------------------------------------
+# 1. PARÁMETROS
+# ------------------------------------------------------------------
+CODIGO = '2024200519L'
+ZONA = ZoneInfo('America/Lima')
+
+BASE = Path(__file__).resolve().parent.parent
+PROCESADOS = BASE / 'datos_procesados'
+SALIDAS = BASE / 'salidas'
+LOG = BASE / 'log_ejecucion.txt'
+SALIDAS.mkdir(exist_ok=True)
+
+Y = 'rend10a'
+X = ['crp', 'inflacion', 'depreciacion']
+VARIABLES = [Y] + X
+
+ETIQUETAS = {'rend10a': 'Rendimiento del bono soberano a 10 años (%)',
+             'crp': 'Prima por riesgo país, CRP (%)',
+             'inflacion': 'Inflación anual (%)',
+             'depreciacion': 'Depreciación cambiaria interanual (%)'}
+FUENTES = {'rend10a': 'FRED (OCDE), Banxico y BCRP',
+           'crp': 'Damodaran (NYU Stern)',
+           'inflacion': 'Banco Mundial (WDI)',
+           'depreciacion': 'Yahoo Finance'}
+COLORES = {'Chile': '#2a78d6', 'Colombia': '#eb6834', 'Mexico': '#1baf7a', 'Peru': '#eda100'}
+TINTA, TINTA_2, GRILLA = '#0b0b0b', '#52514e', '#e6e5e1'
+
+
+# ------------------------------------------------------------------
+# 2. FUNCIONES DE APOYO
+# ------------------------------------------------------------------
+def registrar(mensaje):
+    linea = f'[{datetime.now(ZONA):%Y-%m-%d %H:%M:%S}] 04_analisis | {mensaje}'
+    print(linea)
+    with open(LOG, 'a', encoding='utf-8') as f:
+        f.write(linea + '\n')
+
+
+def estrellas(p):
+    return '***' if p < 0.01 else '**' if p < 0.05 else '*' if p < 0.10 else ''
+
+
+# ------------------------------------------------------------------
+# 3. ESTADÍSTICA DESCRIPTIVA
+# ------------------------------------------------------------------
+def descriptivos(df):
+    filas = []
+    for grupo, d in [('Panel', df)] + list(df.groupby('pais')):
+        for v in VARIABLES:
+            s = d[v]
+            filas.append({'grupo': grupo, 'variable': v, 'n': int(s.count()),
+                          'media': s.mean(), 'desv_est': s.std(),
+                          'min': s.min(), 'max': s.max()})
+    tabla = pd.DataFrame(filas).round(4)
+    tabla.to_csv(SALIDAS / 'tabla1_descriptivos.csv', index=False)
+
+    corr = df[VARIABLES].corr().round(4)
+    corr.to_csv(SALIDAS / 'tabla2_correlaciones.csv')
+
+    xc = sm.add_constant(df[X])
+    vif = pd.DataFrame({'variable': X,
+                        'vif': [variance_inflation_factor(xc.values, i + 1) for i in range(len(X))]}).round(4)
+    vif.to_csv(SALIDAS / 'tabla3_vif.csv', index=False)
+    registrar(f'Descriptivos, correlaciones y VIF guardados | VIF máximo = {vif["vif"].max():.2f}')
+
+
+def raiz_unitaria(df):
+    """ADF por país y combinación de Fisher (Maddala-Wu) para el panel."""
+    filas = []
+    for v in VARIABLES:
+        pvalores = []
+        for pais, d in df.groupby('pais'):
+            serie = d.sort_values('fecha')[v].dropna()
+            est, p, *_ = adfuller(serie, autolag='AIC', regression='c')
+            pvalores.append(p)
+            filas.append({'variable': v, 'unidad': pais, 'estadistico': est, 'p_valor': p})
+        p_arr = np.clip(pvalores, 1e-16, 1)
+        fisher = -2 * np.sum(np.log(p_arr))
+        filas.append({'variable': v, 'unidad': 'Panel (Fisher-ADF)', 'estadistico': fisher,
+                      'p_valor': stats.chi2.sf(fisher, 2 * len(p_arr))})
+    tabla = pd.DataFrame(filas).round(4)
+    tabla.to_csv(SALIDAS / 'tabla4_raiz_unitaria.csv', index=False)
+    panel = tabla[tabla['unidad'] == 'Panel (Fisher-ADF)']
+    registrar(f'Raíz unitaria (p-valor Fisher-ADF): {dict(zip(panel["variable"], panel["p_valor"]))}')
+
+
+# ------------------------------------------------------------------
+# 4. ESTIMACIÓN
+# ------------------------------------------------------------------
+def estimar(panel):
+    y = panel[Y]
+    xc = sm.add_constant(panel[X])
+    # Efectos aleatorios no es estimable (4 países y 4 parámetros:
+    # la regresión "between" no tiene grados de libertad).
+    modelos = {
+        'MCO agrupado': PooledOLS(y, xc).fit(cov_type='robust'),
+        'Efectos fijos': PanelOLS(y, xc, entity_effects=True).fit(cov_type='robust'),
+        'EF Driscoll-Kraay': PanelOLS(y, xc, entity_effects=True).fit(cov_type='kernel'),
+    }
+    # Robustez: sin los meses imputados de México
+    obs = panel[panel['rend10a_tipo'] == 'observado']
+    modelos['EF D-K sin imputados'] = PanelOLS(obs[Y], sm.add_constant(obs[X]),
+                                               entity_effects=True).fit(cov_type='kernel')
+    return modelos
+
+
+def tablas_modelos(modelos):
+    filas = []
+    for nombre, r in modelos.items():
+        for v in ['const'] + X:
+            filas.append({'modelo': nombre, 'variable': v, 'coef': r.params[v],
+                          'error_est': r.std_errors[v], 't': r.tstats[v], 'p_valor': r.pvalues[v],
+                          'r2': r.rsquared, 'n': int(r.nobs)})
+    pd.DataFrame(filas).round(6).to_csv(SALIDAS / 'tabla5_modelos.csv', index=False)
+
+    presentable = pd.DataFrame(
+        {nombre: [f'{r.params[v]:.4f}{estrellas(r.pvalues[v])} ({r.std_errors[v]:.4f})'
+                  for v in ['const'] + X] + [f'{r.rsquared:.4f}', f'{int(r.nobs)}']
+         for nombre, r in modelos.items()},
+        index=['const'] + X + ['R2', 'N'])
+    presentable.to_csv(SALIDAS / 'tabla5_modelos_presentable.csv')
+
+    with open(SALIDAS / 'resumen_modelos.txt', 'w', encoding='utf-8') as f:
+        for nombre, r in modelos.items():
+            f.write(f'\n{"=" * 78}\n{nombre}\n{"=" * 78}\n{r.summary}\n')
+    registrar('Tablas de modelos y resumen_modelos.txt guardados')
+
+
+def pruebas(panel, df, modelos):
+    y = panel[Y]
+    xc = sm.add_constant(panel[X])
+    filas = []
+    fe = PanelOLS(y, xc, entity_effects=True).fit()
+
+    # LM de Breusch-Pagan para efectos por país (versión de Baltagi-Li para
+    # panel desbalanceado). Reemplaza a Hausman, que no es calculable con 4 países.
+    e = pd.Series(sm.OLS(y.values, xc.values).fit().resid, index=panel.index)
+    t_i = e.groupby(level='pais').size()
+    n_obs = t_i.sum()
+    suma_i = e.groupby(level='pais').sum()
+    lm_re = (n_obs ** 2 / (2 * ((t_i ** 2).sum() - n_obs))) * \
+            ((suma_i ** 2).sum() / (e ** 2).sum() - 1) ** 2
+    filas.append({'prueba': 'LM Breusch-Pagan (efectos por país)', 'estadistico': lm_re,
+                  'p_valor': stats.chi2.sf(lm_re, 1), 'h0': 'Sin efecto por país'})
+
+    # F de efectos individuales (MCO agrupado vs EF)
+    filas.append({'prueba': 'F efectos individuales', 'estadistico': fe.f_pooled.stat,
+                  'p_valor': fe.f_pooled.pval, 'h0': 'Sin efectos por país'})
+
+    # Breusch-Pagan de heterocedasticidad sobre MCO agrupado
+    mco = sm.OLS(y.values, xc.values).fit()
+    lm, lm_p, _, _ = het_breuschpagan(mco.resid, xc.values)
+    filas.append({'prueba': 'Breusch-Pagan (heterocedasticidad)', 'estadistico': lm,
+                  'p_valor': lm_p, 'h0': 'Homocedasticidad'})
+
+    # Wooldridge: autocorrelación de primer orden en paneles
+    d = df.sort_values(['pais', 'fecha']).copy()
+    for v in VARIABLES:
+        d['d_' + v] = d.groupby('pais')[v].diff()
+    d = d.dropna(subset=['d_' + v for v in VARIABLES])
+    m1 = sm.OLS(d['d_' + Y], d[['d_' + v for v in X]]).fit()
+    d['u'] = m1.resid
+    d['u_rez'] = d.groupby('pais')['u'].shift(1)
+    d = d.dropna(subset=['u_rez'])
+    m2 = sm.OLS(d['u'], d[['u_rez']]).fit(cov_type='HC1')
+    f_w = ((m2.params['u_rez'] + 0.5) / m2.bse['u_rez']) ** 2
+    filas.append({'prueba': 'Wooldridge AR(1)', 'estadistico': f_w,
+                  'p_valor': stats.f.sf(f_w, 1, len(d) - 1), 'h0': 'Sin autocorrelación'})
+
+    # Pesaran CD: dependencia entre países (residuos de EF)
+    w = fe.resids.unstack('pais')
+    paises = list(w.columns)
+    suma = 0.0
+    for i in range(len(paises)):
+        for j in range(i + 1, len(paises)):
+            par = w[[paises[i], paises[j]]].dropna()
+            suma += np.sqrt(len(par)) * par.corr().iloc[0, 1]
+    n = len(paises)
+    cd = np.sqrt(2 / (n * (n - 1))) * suma
+    filas.append({'prueba': 'Pesaran CD', 'estadistico': cd,
+                  'p_valor': 2 * stats.norm.sf(abs(cd)), 'h0': 'Independencia entre países'})
+
+    tabla = pd.DataFrame(filas).round(6)
+    tabla.to_csv(SALIDAS / 'tabla6_pruebas.csv', index=False)
+    for _, f in tabla.iterrows():
+        registrar(f'{f["prueba"]}: estadístico = {f["estadistico"]:.4f}, p-valor = {f["p_valor"]:.4f}')
+
+    elegido = 'Efectos fijos' if tabla.loc[1, 'p_valor'] < 0.05 else 'MCO agrupado'
+    registrar(f'Prueba F sugiere: {elegido}. EA y Hausman no estimables (4 países, 4 parámetros). '
+              f'Modelo principal: EF con errores Driscoll-Kraay')
+
+
+# ------------------------------------------------------------------
+# 5. FIGURAS
+# ------------------------------------------------------------------
+def estilo():
+    plt.rcParams.update({'font.size': 10, 'axes.spines.top': False, 'axes.spines.right': False,
+                         'axes.edgecolor': '#8a8984', 'axes.grid': True, 'grid.color': GRILLA,
+                         'grid.linewidth': 0.6, 'xtick.color': TINTA_2, 'ytick.color': TINTA_2,
+                         'axes.labelcolor': TINTA_2})
+
+
+def figura_series(df, v, numero):
+    fig, ax = plt.subplots(figsize=(9, 4.8))
+    finales = []
+    for pais, d in df.groupby('pais'):
+        d = d.sort_values('fecha')
+        ax.plot(d['fecha'], d[v], color=COLORES[pais], linewidth=1.6, label=pais)
+        finales.append([d[v].iloc[-1], pais])
+
+    if v == Y:  # meses imputados de México
+        imp = df[df['rend10a_tipo'] != 'observado']
+        ax.scatter(imp['fecha'], imp[Y], s=16, facecolors='white', edgecolors=COLORES['Mexico'],
+                   linewidths=1, zorder=3, label='Mexico: mes imputado')
+    if v == 'depreciacion':
+        ax.axhline(0, color='#8a8984', linewidth=0.8)
+
+    # Etiquetas directas al final de cada línea, sin superponerse
+    lo, hi = ax.get_ylim()
+    separacion = (hi - lo) * 0.06
+    finales.sort()
+    for k in range(1, len(finales)):
+        finales[k][0] = max(finales[k][0], finales[k - 1][0] + separacion)
+    x_fin = df['fecha'].max() + pd.Timedelta(days=60)
+    for valor, pais in finales:
+        ax.text(x_fin, valor, pais, va='center', fontsize=9, color=TINTA_2)
+    ax.set_xlim(right=df['fecha'].max() + pd.Timedelta(days=700))
+
+    ax.set_title(ETIQUETAS[v], loc='left', fontsize=12, color=TINTA)
+    ax.set_ylabel('%')
+    ax.legend(frameon=False, ncol=5, loc='upper left', bbox_to_anchor=(0, -0.07), fontsize=9)
+    fig.text(0.01, 0.01, f'Fuente: {FUENTES[v]}. Elaboración propia.', fontsize=8, color=TINTA_2)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    fig.savefig(SALIDAS / f'figura{numero}_{v}.png', dpi=200)
+    plt.close(fig)
+
+
+def figura_dispersion(df):
+    fig, ejes = plt.subplots(2, 2, figsize=(9, 7), sharex=True, sharey=True)
+    for ax, (pais, d) in zip(ejes.flat, df.groupby('pais')):
+        ax.scatter(d['crp'], d[Y], s=10, color=COLORES[pais], alpha=0.6, edgecolors='none')
+        m, c = np.polyfit(d['crp'], d[Y], 1)
+        xs = np.linspace(d['crp'].min(), d['crp'].max(), 50)
+        ax.plot(xs, m * xs + c, color=TINTA_2, linewidth=1.2)
+        ax.set_title(pais, loc='left', fontsize=10, color=TINTA)
+    for ax in ejes[1]:
+        ax.set_xlabel('CRP (%)')
+    for ax in ejes[:, 0]:
+        ax.set_ylabel('Rendimiento 10 años (%)')
+    fig.suptitle('Rendimiento del bono a 10 años frente a la prima por riesgo país',
+                 x=0.01, ha='left', fontsize=12, color=TINTA)
+    fig.text(0.01, 0.01, 'Fuente: FRED, Banxico, BCRP y Damodaran. Elaboración propia.',
+             fontsize=8, color=TINTA_2)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.97))
+    fig.savefig(SALIDAS / 'figura5_dispersion_rend10a_crp.png', dpi=200)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------
+# 6. EJECUCIÓN
+# ------------------------------------------------------------------
+if __name__ == '__main__':
+    registrar('=== Inicio del análisis ===')
+    registrar(f'Python {sys.version.split()[0]} | pandas {pd.__version__} | numpy {np.__version__} | '
+              f'statsmodels {statsmodels.__version__} | linearmodels {linearmodels.__version__} | '
+              f'matplotlib {matplotlib.__version__}')
+
+    ruta = PROCESADOS / f'datos_procesados_{CODIGO}.csv'
+    df = pd.read_csv(ruta)
+    df['fecha'] = pd.to_datetime(df['fecha'] + '-01')
+    registrar(f'Lectura {ruta.name} | {len(df)} filas')
+
+    descriptivos(df)
+    raiz_unitaria(df)
+
+    panel = df.set_index(['pais', 'fecha'])
+    modelos = estimar(panel)
+    tablas_modelos(modelos)
+
+    principal = modelos['EF Driscoll-Kraay']
+    for v in X:
+        signo = 'positivo (esperado)' if principal.params[v] > 0 else 'negativo (contrario al esperado)'
+        registrar(f'EF D-K | {v}: coef = {principal.params[v]:.4f}, p = {principal.pvalues[v]:.4f} -> {signo}')
+
+    pruebas(panel, df, modelos)
+
+    estilo()
+    for numero, v in enumerate(VARIABLES, start=1):
+        figura_series(df, v, numero)
+    figura_dispersion(df)
+    registrar('Figuras guardadas en /salidas (figura1 a figura5)')
+    registrar('=== Fin del análisis ===')

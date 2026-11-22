@@ -1,8 +1,10 @@
+# Nombres y apellidos: Abril Shantal Ricaldi Bravo
+# Código de matrícula: 2024200519L
+# Tema N.º 64 del temario: Costo del capital en mercados emergentes: Perú, Chile, Colombia y México
+# Fecha de extracción: 19/11/2026 (API) y 21/11/2026 (scraping)
 """
 03_limpieza_datos.py
-Proyecto : Costo del capital en mercados emergentes: Perú, Chile, Colombia y México
-Autora   : Abril Shantal Ricaldi Bravo · Código 2024200519L
-Curso    : Finanzas I (055D) · UNCP · 2026-II · Tema 64
+Curso    : Finanzas I (055D) · UNCP · 2026-II
 
 Construye la base procesada a partir de datos_crudos_2024200519L.csv:
   - rend10a      : rendimiento del bono soberano a 10 años (%), mensual.
@@ -13,7 +15,8 @@ Construye la base procesada a partir de datos_crudos_2024200519L.csv:
   - inflacion    : inflación anual IPC del Banco Mundial (%), anual repetida.
   - depreciacion : variación % interanual del tipo de cambio (moneda local
                    por USD, cierre de mes). Positivo = depreciación.
-Llave: pais + fecha (AAAA-MM). Calcula el hash SHA-256 del archivo final.
+Llave: pais + fecha (AAAA-MM). Identifica atípicos (se conservan) y calcula
+el hash SHA-256 del archivo final.
 """
 
 import hashlib
@@ -36,12 +39,15 @@ ZONA = ZoneInfo('America/Lima')
 BASE = Path(__file__).resolve().parent.parent
 CRUDOS = BASE / 'datos_crudos'
 PROCESADOS = BASE / 'datos_procesados'
+SALIDAS = BASE / 'salidas'
 LOG = BASE / 'log_ejecucion.txt'
 PROCESADOS.mkdir(exist_ok=True)
+SALIDAS.mkdir(exist_ok=True)
 
 NOMBRES = {'CHL': 'Chile', 'COL': 'Colombia', 'MEX': 'Mexico', 'PER': 'Peru'}
 MESES = pd.period_range(FECHA_INICIO, FECHA_CORTE, freq='M')
 SUSTANTIVAS = ['rend10a', 'crp', 'inflacion', 'depreciacion']
+FACTOR_RIC = 3  # regla de Tukey para atípicos extremos
 
 
 # ------------------------------------------------------------------
@@ -120,6 +126,33 @@ def construir_depreciacion(crudos):
     return tc[['pais', 'fecha', 'tipo_cambio', 'depreciacion']]
 
 
+def identificar_atipicos(panel):
+    """Regla de Tukey extrema (3 x RIC) por país y variable.
+
+    Los atípicos se identifican y se CONSERVAN: corresponden a episodios
+    reales (crisis 2008-09, caída del petróleo 2014-16, pandemia 2020,
+    inflación 2021-23), no a errores de la fuente. Eliminarlos quitaría
+    justamente los periodos de estrés que interesan al estudio.
+    """
+    filas = []
+    for pais, d in panel.groupby('pais'):
+        for v in SUSTANTIVAS:
+            q1, q3 = d[v].quantile([0.25, 0.75])
+            ric = q3 - q1
+            lim_inf, lim_sup = q1 - FACTOR_RIC * ric, q3 + FACTOR_RIC * ric
+            fuera = d[(d[v] < lim_inf) | (d[v] > lim_sup)]
+            for _, f in fuera.iterrows():
+                filas.append({'pais': NOMBRES[pais], 'fecha': str(f['fecha']), 'variable': v,
+                              'valor': round(f[v], 4), 'limite_inferior': round(lim_inf, 4),
+                              'limite_superior': round(lim_sup, 4)})
+    tabla = pd.DataFrame(filas, columns=['pais', 'fecha', 'variable', 'valor',
+                                         'limite_inferior', 'limite_superior'])
+    tabla.to_csv(SALIDAS / 'tabla0_atipicos.csv', index=False)
+    resumen = tabla.groupby(['pais', 'variable']).size().to_dict() if len(tabla) else {}
+    registrar(f'Atípicos (regla {FACTOR_RIC} x RIC por país): {len(tabla)} identificados y conservados '
+              f'-> salidas/tabla0_atipicos.csv | {resumen}')
+
+
 # ------------------------------------------------------------------
 # 4. EJECUCIÓN
 # ------------------------------------------------------------------
@@ -151,6 +184,7 @@ if __name__ == '__main__':
     for v in SUSTANTIVAS:
         rangos = panel.groupby('pais')[v].agg(['min', 'max']).round(2)
         registrar(f'Rango de {v} por país: {rangos.to_dict("index")}')
+    identificar_atipicos(panel)
 
     # Formato final
     panel['pais'] = panel['pais'].map(NOMBRES)

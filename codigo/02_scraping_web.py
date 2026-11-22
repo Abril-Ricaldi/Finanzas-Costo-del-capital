@@ -1,3 +1,7 @@
+# Nombres y apellidos: Abril Shantal Ricaldi Bravo
+# Código de matrícula: 2024200519L
+# Tema N.º 64 del temario: Costo del capital en mercados emergentes: Perú, Chile, Colombia y México
+# Fecha de extracción: 21/11/2026
 """
 02_scraping_web.py
 Proyecto : Costo del capital en mercados emergentes: Perú, Chile, Colombia y México
@@ -35,8 +39,10 @@ from bs4 import BeautifulSoup
 # ------------------------------------------------------------------
 # 1. PARÁMETROS
 # ------------------------------------------------------------------
-ANIO_INICIO = 2005
-ANIO_FIN = 2025
+FECHA_INICIO = '2005-01-01'
+FECHA_CORTE = '2025-12-31'
+ANIO_INICIO = int(FECHA_INICIO[:4])
+ANIO_FIN = int(FECHA_CORTE[:4])
 CODIGO = '2024200519L'
 ZONA = ZoneInfo('America/Lima')
 
