@@ -385,6 +385,98 @@ def figura_cajas(df):
     fig.savefig(SALIDAS / 'figura8_cajas_rend10a.png', dpi=200)
     plt.close(fig)
 
+def newey_west(y, Xc, rezagos=4):
+    # MCO con errores estándar de Newey-West (núcleo de Bartlett, corrección n/(n-k))
+    n, k = Xc.shape
+    XtX_inv = np.linalg.inv(Xc.T @ Xc)
+    b = XtX_inv @ Xc.T @ y
+    u = y - Xc @ b
+    Xu = Xc * u[:, None]
+    S = Xu.T @ Xu
+    for l in range(1, rezagos + 1):
+        peso = 1 - l / (rezagos + 1)
+        G = Xu[l:].T @ Xu[:-l]
+        S += peso * (G + G.T)
+    V = XtX_inv @ S @ XtX_inv * n / (n - k)
+    ee = np.sqrt(np.diag(V))
+    t = b / ee
+    p = 2 * stats.norm.sf(np.abs(t))
+    r2 = 1 - (u @ u) / ((y - y.mean()) @ (y - y.mean()))
+    return b, ee, t, p, r2, n
+
+
+def modelos_por_pais(df):
+    # Regresión por país con errores de Newey-West (4 rezagos) y prueba F de homogeneidad de pendientes
+    filas = []
+    for pais, d in df.groupby('pais'):
+        d = d.sort_values('fecha')
+        Xc = np.column_stack([np.ones(len(d)), d[X].to_numpy()])
+        b, ee, t, p, r2, n = newey_west(d[Y].to_numpy(), Xc)
+        for j, v in enumerate(['const'] + X):
+            filas.append({'pais': pais, 'variable': v, 'coef': b[j], 'error_est': ee[j], 't': t[j],
+                          'p_valor': p[j], 'ic_inf': b[j] - 1.96 * ee[j], 'ic_sup': b[j] + 1.96 * ee[j],
+                          'r2': r2, 'n': n})
+    tabla = pd.DataFrame(filas).round(6)
+    tabla.to_csv(SALIDAS / 'tabla7_modelos_por_pais.csv', index=False)
+
+    # Prueba F: pendientes comunes (restringido) frente a pendientes propias de cada país
+    dummies = pd.get_dummies(df['pais'], dtype=float)
+    Xr = np.column_stack([dummies.to_numpy(), df[X].to_numpy()])
+    Xu = np.column_stack([dummies.to_numpy()] + [dummies.to_numpy() * df[[v]].to_numpy() for v in X])
+    y = df[Y].to_numpy()
+    rss = lambda M: np.sum((y - M @ np.linalg.lstsq(M, y, rcond=None)[0]) ** 2)
+    q = Xu.shape[1] - Xr.shape[1]
+    gl = len(y) - Xu.shape[1]
+    f = ((rss(Xr) - rss(Xu)) / q) / (rss(Xu) / gl)
+    homog = pd.DataFrame([{'prueba': 'Homogeneidad de pendientes entre países', 'estadistico_F': f,
+                           'gl_numerador': q, 'gl_denominador': gl, 'p_valor': stats.f.sf(f, q, gl)}]).round(6)
+    homog.to_csv(SALIDAS / 'tabla8_homogeneidad.csv', index=False)
+    registrar(f'Modelos por país (Newey-West, 4 rezagos) guardados | Homogeneidad: F({q}, {gl}) = {f:.4f}, '
+              f'p = {stats.f.sf(f, q, gl):.4f}')
+    return tabla
+
+
+def tabla_hipotesis(modelo):
+    # Contraste de hipótesis con el modelo principal (EF con errores de Driscoll-Kraay)
+    hip = {'crp': ('H1', '+'), 'inflacion': ('H2', '+'), 'depreciacion': ('H3', '+')}
+    filas = []
+    for v in X:
+        b, p = modelo.params[v], modelo.pvalues[v]
+        if p >= 0.05:
+            decision = 'No significativa al 5 %'
+        elif np.sign(b) > 0:
+            decision = 'Se acepta'
+        else:
+            decision = 'Se rechaza: signo contrario'
+        filas.append({'hipotesis': hip[v][0], 'variable': v, 'signo_esperado': hip[v][1],
+                      'coef': b, 'error_est': modelo.std_errors[v], 'p_valor': p, 'decision': decision})
+    pd.DataFrame(filas).round(6).to_csv(SALIDAS / 'tabla9_hipotesis.csv', index=False)
+
+
+def figura_coef_por_pais(tabla):
+    # Figura 9: coeficientes por país con intervalos de confianza al 95 %
+    nombres = {'crp': 'Prima por riesgo país', 'inflacion': 'Inflación', 'depreciacion': 'Depreciación'}
+    paises = sorted(tabla['pais'].unique())
+    fig, ejes = plt.subplots(1, 3, figsize=(10, 3.8), sharey=True)
+    for ax, v in zip(ejes, X):
+        for k, pais in enumerate(paises):
+            fila = tabla[(tabla['pais'] == pais) & (tabla['variable'] == v)].iloc[0]
+            ax.errorbar(fila['coef'], k, xerr=fila['coef'] - fila['ic_inf'], fmt='o', color=COLORES[pais],
+                        ecolor=COLORES[pais], elinewidth=2, capsize=4, markersize=6)
+        ax.axvline(0, color='#8a8984', linewidth=1, linestyle='--')
+        ax.set_title(nombres[v], loc='left', fontsize=11, color=TINTA)
+        ax.xaxis.set_major_formatter(lambda x, _: f'{x:g}'.replace('.', ',').replace('-', '−'))
+        ax.grid(axis='y', visible=False)
+    ejes[0].set_yticks(range(len(paises)), paises)
+    ejes[0].invert_yaxis()
+    fig.suptitle('Coeficientes por país e intervalos de confianza al 95 % (MCO con errores de Newey-West)',
+                 x=0.01, ha='left', fontsize=12, color=TINTA)
+    fig.text(0.01, 0.01, 'Variable dependiente: rendimiento del bono a 10 años (%). Fuente: tabla7_modelos_por_pais.csv. '
+             'Elaboración propia.', fontsize=8, color=TINTA_2)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.94))
+    fig.savefig(SALIDAS / 'figura9_coef_por_pais.png', dpi=200)
+    plt.close(fig)
+
 # ------------------------------------------------------------------
 # 6. EJECUCIÓN
 # ------------------------------------------------------------------
@@ -412,6 +504,8 @@ if __name__ == '__main__':
         registrar(f'EF D-K | {v}: coef = {principal.params[v]:.4f}, p = {principal.pvalues[v]:.4f} -> {signo}')
 
     pruebas(panel, df, modelos)
+    tabla_hipotesis(principal)
+    por_pais = modelos_por_pais(df)
 
     estilo()
     for numero, v in enumerate(VARIABLES, start=1):
@@ -420,5 +514,6 @@ if __name__ == '__main__':
     figura_correlaciones(df)
     figura_coeficientes(modelos)
     figura_cajas(df)
-    registrar('Figuras guardadas en /salidas (figura1 a figura8)')
+    figura_coef_por_pais(por_pais)
+    registrar('Figuras guardadas en /salidas (figura1 a figura9)')
     registrar('=== Fin del análisis ===')
