@@ -302,6 +302,89 @@ def figura_dispersion(df):
     plt.close(fig)
 
 
+def figura_correlaciones(df):
+    # Figura 6: mapa de calor de la matriz de correlaciones de Pearson (mismos valores que tabla2_correlaciones.csv)
+    nombres = {'rend10a': 'Rendimiento\n10 años', 'crp': 'Prima por\nriesgo país',
+               'inflacion': 'Inflación', 'depreciacion': 'Depreciación'}
+    corr = df[VARIABLES].corr().round(4)
+    n = len(VARIABLES)
+    fig, ax = plt.subplots(figsize=(6.6, 5.6))
+    im = ax.imshow(corr.values, cmap='RdBu_r', vmin=-1, vmax=1)
+    for i in range(n):
+        for j in range(n):
+            r = corr.iloc[i, j]
+            p = stats.pearsonr(df[VARIABLES[i]], df[VARIABLES[j]])[1] if i != j else 0
+            marca = '' if i == j else ('***' if p < 0.01 else '**' if p < 0.05 else '*' if p < 0.10 else '')
+            texto = f'{r:.2f}'.replace('.', ',').replace('-', '−') + marca
+            ax.text(j, i, texto, ha='center', va='center', fontsize=11,
+                    color='white' if abs(r) > 0.6 else TINTA)
+    etiquetas = [nombres[v] for v in VARIABLES]
+    ax.set_xticks(range(n), etiquetas, fontsize=9)
+    ax.set_yticks(range(n), etiquetas, fontsize=9)
+    ax.tick_params(length=0)
+    ax.grid(False)
+    for lado in ax.spines.values():
+        lado.set_visible(False)
+    barra = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    barra.outline.set_visible(False)
+    barra.ax.yaxis.set_major_formatter(lambda x, _: f'{x:.2f}'.replace('.', ',').replace('-', '−'))
+    ax.set_title('Matriz de correlaciones de Pearson (n = 1 004)', loc='left', fontsize=12, color=TINTA)
+    fig.text(0.01, 0.01, '*** p < 0,01; ** p < 0,05; * p < 0,10. Fuente: FRED, Banxico, BCRP, Damodaran, '
+             'Banco Mundial y Yahoo Finance. Elaboración propia.', fontsize=7, color=TINTA_2)
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    fig.savefig(SALIDAS / 'figura6_correlaciones.png', dpi=200)
+    plt.close(fig)
+
+
+def figura_coeficientes(modelos):
+    # Figura 7: coeficientes de los 4 modelos con intervalos de confianza al 95 % (coef ± 1,96 × error estándar)
+    nombres = {'crp': 'Prima por riesgo país', 'inflacion': 'Inflación', 'depreciacion': 'Depreciación'}
+    lista = list(modelos.keys())
+    fig, ejes = plt.subplots(1, 3, figsize=(10, 4.2), sharey=True)
+    for ax, v in zip(ejes, X):
+        for k, nombre in enumerate(lista):
+            r = modelos[nombre]
+            b, ee = r.params[v], r.std_errors[v]
+            color = '#eb6834' if nombre == 'EF Driscoll-Kraay' else TINTA_2
+            ax.errorbar(b, k, xerr=1.96 * ee, fmt='o', color=color, ecolor=color,
+                        elinewidth=2, capsize=4, markersize=6)
+        ax.axvline(0, color='#8a8984', linewidth=1, linestyle='--')
+        ax.set_title(nombres[v], loc='left', fontsize=11, color=TINTA)
+        ax.xaxis.set_major_formatter(lambda x, _: f'{x:g}'.replace('.', ',').replace('-', '−'))
+        ax.grid(axis='y', visible=False)
+    ejes[0].set_yticks(range(len(lista)), lista)
+    ejes[0].invert_yaxis()
+    fig.suptitle('Coeficientes estimados e intervalos de confianza al 95 % (en naranja, el modelo principal)',
+                 x=0.01, ha='left', fontsize=12, color=TINTA)
+    fig.text(0.01, 0.01, 'Variable dependiente: rendimiento del bono a 10 años (%). Fuente: tabla5_modelos.csv. '
+             'Elaboración propia.', fontsize=8, color=TINTA_2)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.95))
+    fig.savefig(SALIDAS / 'figura7_coeficientes.png', dpi=200)
+    plt.close(fig)
+
+
+def figura_cajas(df):
+    # Figura 8: distribución del rendimiento a 10 años por país (diagrama de cajas)
+    paises = sorted(df['pais'].unique())
+    fig, ax = plt.subplots(figsize=(8, 4.8))
+    cajas = ax.boxplot([df.loc[df['pais'] == p, Y] for p in paises], patch_artist=True, widths=0.55,
+                       medianprops={'color': TINTA, 'linewidth': 1.5},
+                       flierprops={'marker': 'o', 'markersize': 3, 'markerfacecolor': TINTA_2,
+                                   'markeredgecolor': 'none'})
+    for caja, p in zip(cajas['boxes'], paises):
+        caja.set_facecolor(COLORES[p])
+        caja.set_alpha(0.75)
+        caja.set_edgecolor(TINTA_2)
+    ax.set_xticks(range(1, len(paises) + 1), paises)
+    ax.set_ylabel('%')
+    ax.grid(axis='x', visible=False)
+    ax.set_title('Rendimiento del bono soberano a 10 años por país, 2005-2025', loc='left',
+                 fontsize=12, color=TINTA)
+    fig.text(0.01, 0.01, 'Fuente: FRED (OCDE), Banxico y BCRP. Elaboración propia.', fontsize=8, color=TINTA_2)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    fig.savefig(SALIDAS / 'figura8_cajas_rend10a.png', dpi=200)
+    plt.close(fig)
+
 # ------------------------------------------------------------------
 # 6. EJECUCIÓN
 # ------------------------------------------------------------------
@@ -334,5 +417,8 @@ if __name__ == '__main__':
     for numero, v in enumerate(VARIABLES, start=1):
         figura_series(df, v, numero)
     figura_dispersion(df)
-    registrar('Figuras guardadas en /salidas (figura1 a figura5)')
+    figura_correlaciones(df)
+    figura_coeficientes(modelos)
+    figura_cajas(df)
+    registrar('Figuras guardadas en /salidas (figura1 a figura8)')
     registrar('=== Fin del análisis ===')
