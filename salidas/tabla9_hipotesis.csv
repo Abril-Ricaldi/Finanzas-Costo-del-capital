@@ -1,0 +1,4 @@
+hipotesis,variable,signo_esperado,coef,error_est,p_valor,decision
+H1,crp,+,0.201773,0.196135,0.303851,No significativa al 5 %
+H2,inflacion,+,0.343681,0.040107,0.0,Se acepta
+H3,depreciacion,+,-0.021181,0.008815,0.016451,Se rechaza: signo contrario
