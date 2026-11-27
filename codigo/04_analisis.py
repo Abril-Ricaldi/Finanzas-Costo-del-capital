@@ -477,6 +477,74 @@ def figura_coef_por_pais(tabla):
     fig.savefig(SALIDAS / 'figura9_coef_por_pais.png', dpi=200)
     plt.close(fig)
 
+def cov_driscoll_kraay(Xc, u, tiempos, rezagos=4, absorbidos=0):
+    # Errores de Driscoll-Kraay: Newey-West (Bartlett) sobre la suma de x*u de cada mes,
+    # con la misma corrección de muestra pequeña que linearmodels: n / (n - parámetros - efectos absorbidos)
+    n, k = Xc.shape
+    XtX_inv = np.linalg.inv(Xc.T @ Xc)
+    Xu = Xc * u[:, None]
+    h = np.vstack([Xu[tiempos == t].sum(axis=0) for t in np.unique(tiempos)])
+    S = h.T @ h
+    for l in range(1, rezagos + 1):
+        G = h[l:].T @ h[:-l]
+        S += (1 - l / (rezagos + 1)) * (G + G.T)
+    return XtX_inv @ S @ XtX_inv * n / (n - k - absorbidos)
+
+
+def robustez_adicional(df):
+    # Pruebas de robustez: (a) efectos fijos de país y de mes, (b) Newey-West con 12 rezagos por país,
+    # (c) prueba de homogeneidad de pendientes con errores de Driscoll-Kraay
+    df = df.sort_values(['pais', 'fecha']).reset_index(drop=True)
+    y = df[Y].to_numpy()
+    tiempos = df['fecha'].to_numpy()
+    paises = pd.get_dummies(df['pais'], dtype=float).to_numpy()
+    meses = pd.get_dummies(df['fecha'], dtype=float).to_numpy()[:, 1:]
+
+    # (a) Efectos fijos de país y de mes (los choques comunes de cada mes quedan absorbidos)
+    Xa = np.column_stack([df[X].to_numpy(), paises, meses])
+    b = np.linalg.lstsq(Xa, y, rcond=None)[0]
+    u = y - Xa @ b
+    V = cov_driscoll_kraay(Xa, u, tiempos)
+    filas = []
+    for j, v in enumerate(X):
+        ee = np.sqrt(V[j, j])
+        filas.append({'modelo': 'EF país y mes (Driscoll-Kraay)', 'variable': v, 'coef': b[j], 'error_est': ee,
+                      't': b[j] / ee, 'p_valor': 2 * stats.norm.sf(abs(b[j] / ee)), 'n': len(y)})
+    pd.DataFrame(filas).round(6).to_csv(SALIDAS / 'tabla10_efectos_pais_y_mes.csv', index=False)
+
+    # (b) Regresiones por país con Newey-West de 12 rezagos (un año completo)
+    filas = []
+    for pais, d in df.groupby('pais'):
+        Xc = np.column_stack([np.ones(len(d)), d[X].to_numpy()])
+        bb, ee, t, p, r2, n = newey_west(d[Y].to_numpy(), Xc, rezagos=12)
+        for j, v in enumerate(['const'] + X):
+            filas.append({'pais': pais, 'variable': v, 'coef': bb[j], 'error_est': ee[j], 't': t[j],
+                          'p_valor': p[j], 'n': n})
+    pd.DataFrame(filas).round(6).to_csv(SALIDAS / 'tabla11_por_pais_nw12.csv', index=False)
+
+    # (c) Homogeneidad de pendientes con errores de Driscoll-Kraay (prueba de Wald)
+    Xu = np.column_stack([paises] + [paises * df[[v]].to_numpy() for v in X])
+    bu = np.linalg.lstsq(Xu, y, rcond=None)[0]
+    uu = y - Xu @ bu
+    Vu = cov_driscoll_kraay(Xu, uu, tiempos)
+    k = paises.shape[1]
+    R = []
+    for j in range(len(X)):
+        for c in range(1, k):
+            fila = np.zeros(Xu.shape[1])
+            fila[k + j * k] = 1
+            fila[k + j * k + c] = -1
+            R.append(fila)
+    R = np.array(R)
+    dif = R @ bu
+    wald = float(dif @ np.linalg.inv(R @ Vu @ R.T) @ dif)
+    q = R.shape[0]
+    pd.DataFrame([{'prueba': 'Homogeneidad de pendientes (Wald, Driscoll-Kraay)', 'estadistico_chi2': wald,
+                   'gl': q, 'p_valor': stats.chi2.sf(wald, q)}]).round(6).to_csv(
+        SALIDAS / 'tabla12_homogeneidad_robusta.csv', index=False)
+    registrar(f'Robustez: EF país y mes, Newey-West 12 rezagos y homogeneidad robusta guardados | '
+              f'Wald chi2({q}) = {wald:.4f}, p = {stats.chi2.sf(wald, q):.4f}')
+
 # ------------------------------------------------------------------
 # 6. EJECUCIÓN
 # ------------------------------------------------------------------
@@ -506,6 +574,7 @@ if __name__ == '__main__':
     pruebas(panel, df, modelos)
     tabla_hipotesis(principal)
     por_pais = modelos_por_pais(df)
+    robustez_adicional(df)
 
     estilo()
     for numero, v in enumerate(VARIABLES, start=1):
