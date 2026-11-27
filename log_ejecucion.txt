@@ -1,0 +1,172 @@
+[2026-11-19 21:19:40] 01_extraccion_api | === Inicio de la extracción por API ===
+[2026-11-19 21:19:40] 01_extraccion_api | Python 3.13.18 | pandas 2.2.3 | requests 2.32.4 | yfinance 0.2.66
+[2026-11-19 21:19:40] 01_extraccion_api | Ventana: 2005-01-01 a 2025-12-31
+[2026-11-19 21:19:40] 01_extraccion_api | FRED IRLTLT01CLM156N (CHL) | HTTP 200 | 252 filas -> fred_bono10a_CHL.csv
+[2026-11-19 21:19:41] 01_extraccion_api | FRED COLIRLTLT01STM (COL) | HTTP 200 | 252 filas -> fred_bono10a_COL.csv
+[2026-11-19 21:19:43] 01_extraccion_api | Banxico SF44071 (MEX) | HTTP 200 | 751 registros (194 subastas con dato) -> banxico_bono10a_MEX.csv
+[2026-11-19 21:19:45] 01_extraccion_api | BCRP PD31895MM (PER) | HTTP 200 | 248 filas -> bcrp_bono10a_PER.csv
+[2026-11-19 21:19:46] 01_extraccion_api | Banco Mundial FP.CPI.TOTL.ZG | HTTP 200 | 84 filas (0 sin dato) -> bm_inflacion_anual.csv
+[2026-11-19 21:19:47] 01_extraccion_api | Yahoo PEN=X | 264 meses (2004-01 a 2025-12) -> yahoo_tc_PEN.csv
+[2026-11-19 21:19:48] 01_extraccion_api | Yahoo CLP=X | 264 meses (2004-01 a 2025-12) -> yahoo_tc_CLP.csv
+[2026-11-19 21:19:49] 01_extraccion_api | Yahoo COP=X | 264 meses (2004-01 a 2025-12) -> yahoo_tc_COP.csv
+[2026-11-19 21:19:51] 01_extraccion_api | Yahoo MXN=X | 264 meses (2004-01 a 2025-12) -> yahoo_tc_MXN.csv
+[2026-11-19 21:19:52] 01_extraccion_api | === Fin de la extracción por API ===
+[2026-11-20 23:30:21] 02_scraping_web | === Inicio del scraping de Damodaran ===
+[2026-11-20 23:30:21] 02_scraping_web | Python 3.13.18 | requests 2.32.4
+[2026-11-20 23:30:21] 02_scraping_web | robots.txt | HTTP 200
+[2026-11-20 23:30:21] 02_scraping_web | Intento 1: HTTP 403 en https://pages.stern.nyu.edu/~adamodar/pc/archives/
+[2026-11-20 23:30:23] 02_scraping_web | Intento 2: HTTP 403 en https://pages.stern.nyu.edu/~adamodar/pc/archives/
+[2026-11-20 23:30:27] 02_scraping_web | Intento 3: HTTP 403 en https://pages.stern.nyu.edu/~adamodar/pc/archives/
+[2026-11-20 23:35:36] 02_scraping_web | === Inicio del scraping de Damodaran ===
+[2026-11-20 23:35:36] 02_scraping_web | Python 3.13.18 | requests 2.32.4
+[2026-11-20 23:35:36] 02_scraping_web | robots.txt | HTTP 200
+[2026-11-20 23:35:36] 02_scraping_web | Página https://pages.stern.nyu.edu/~adamodar/New_Home_Page/dataarchived.html | HTTP 200 | 25 enlaces ctryprem encontrados
+[2026-11-20 23:35:38] 02_scraping_web | Enero 2005 -> ctryprem04.xls | HTTP 200 | 62 KB
+[2026-11-20 23:35:41] 02_scraping_web | Enero 2006 -> ctryprem05.xls | HTTP 200 | 58 KB
+[2026-11-20 23:35:43] 02_scraping_web | Enero 2007 -> ctryprem06.xls | HTTP 200 | 59 KB
+[2026-11-20 23:35:45] 02_scraping_web | Enero 2008 -> ctryprem07.xls | HTTP 200 | 104 KB
+[2026-11-20 23:35:47] 02_scraping_web | Enero 2009 -> ctryprem08.xls | HTTP 200 | 100 KB
+[2026-11-20 23:35:49] 02_scraping_web | Enero 2010 -> ctryprem09.xls | HTTP 200 | 96 KB
+[2026-11-20 23:35:51] 02_scraping_web | Enero 2011 -> ctryprem10.xls | HTTP 200 | 130 KB
+[2026-11-20 23:35:53] 02_scraping_web | Enero 2012 -> ctryprem11.xls | HTTP 200 | 154 KB
+[2026-11-20 23:35:56] 02_scraping_web | Enero 2013 -> ctryprem12.xls | HTTP 200 | 292 KB
+[2026-11-20 23:35:58] 02_scraping_web | Enero 2014 -> ctryprem13.xls | HTTP 200 | 362 KB
+[2026-11-20 23:36:00] 02_scraping_web | Enero 2015 -> ctryprem14.xls | HTTP 200 | 476 KB
+[2026-11-20 23:36:02] 02_scraping_web | Enero 2016 -> ctryprem15.xls | HTTP 200 | 621 KB
+[2026-11-20 23:36:04] 02_scraping_web | Enero 2017 -> ctryprem16.xls | HTTP 200 | 738 KB
+[2026-11-20 23:36:07] 02_scraping_web | Enero 2018 -> ctryprem17.xls | HTTP 200 | 751 KB
+[2026-11-20 23:36:09] 02_scraping_web | Enero 2019 -> ctryprem18.xls | HTTP 200 | 755 KB
+[2026-11-20 23:36:11] 02_scraping_web | Enero 2020 -> ctryprem19.xls | HTTP 200 | 696 KB
+[2026-11-20 23:36:13] 02_scraping_web | Enero 2021 -> ctryprem20.xls | HTTP 200 | 714 KB
+[2026-11-20 23:36:16] 02_scraping_web | Enero 2022 -> ctryprem21.xlsx | HTTP 200 | 272 KB
+[2026-11-20 23:36:18] 02_scraping_web | Enero 2023 -> ctryprem22.xlsx | HTTP 200 | 317 KB
+[2026-11-20 23:36:20] 02_scraping_web | Enero 2024 -> ctryprem23.xlsx | HTTP 200 | 345 KB
+[2026-11-20 23:36:22] 02_scraping_web | Enero 2025 -> ctryprem24.xlsx | HTTP 200 | 365 KB
+[2026-11-20 23:36:24] 02_scraping_web | === Fin del scraping de Damodaran ===
+[2026-11-21 00:11:06] 02_scraping_web | === Inicio del scraping de Damodaran ===
+[2026-11-21 00:11:06] 02_scraping_web | Python 3.13.18 | pandas 2.2.3 | requests 2.32.4
+[2026-11-21 00:11:06] 02_scraping_web | robots.txt | HTTP 200
+[2026-11-21 00:11:06] 02_scraping_web | Página https://pages.stern.nyu.edu/~adamodar/New_Home_Page/dataarchived.html | HTTP 200 | 25 enlaces ctryprem encontrados
+[2026-11-21 00:11:08] 02_scraping_web | Enero 2005 -> ctryprem04.xls | HTTP 200 | 62 KB
+[2026-11-21 00:11:10] 02_scraping_web | Enero 2006 -> ctryprem05.xls | HTTP 200 | 58 KB
+[2026-11-21 00:11:13] 02_scraping_web | Enero 2007 -> ctryprem06.xls | HTTP 200 | 59 KB
+[2026-11-21 00:11:15] 02_scraping_web | Enero 2008 -> ctryprem07.xls | HTTP 200 | 104 KB
+[2026-11-21 00:11:17] 02_scraping_web | Enero 2009 -> ctryprem08.xls | HTTP 200 | 100 KB
+[2026-11-21 00:11:19] 02_scraping_web | Enero 2010 -> ctryprem09.xls | HTTP 200 | 96 KB
+[2026-11-21 00:11:21] 02_scraping_web | Enero 2011 -> ctryprem10.xls | HTTP 200 | 130 KB
+[2026-11-21 00:11:23] 02_scraping_web | Enero 2012 -> ctryprem11.xls | HTTP 200 | 154 KB
+[2026-11-21 00:11:25] 02_scraping_web | Enero 2013 -> ctryprem12.xls | HTTP 200 | 292 KB
+[2026-11-21 00:11:28] 02_scraping_web | Enero 2014 -> ctryprem13.xls | HTTP 200 | 362 KB
+[2026-11-21 00:11:30] 02_scraping_web | Enero 2015 -> ctryprem14.xls | HTTP 200 | 476 KB
+[2026-11-21 00:11:32] 02_scraping_web | Enero 2016 -> ctryprem15.xls | HTTP 200 | 621 KB
+[2026-11-21 00:11:34] 02_scraping_web | Enero 2017 -> ctryprem16.xls | HTTP 200 | 738 KB
+[2026-11-21 00:11:37] 02_scraping_web | Enero 2018 -> ctryprem17.xls | HTTP 200 | 751 KB
+[2026-11-21 00:11:39] 02_scraping_web | Enero 2019 -> ctryprem18.xls | HTTP 200 | 755 KB
+[2026-11-21 00:11:41] 02_scraping_web | Enero 2020 -> ctryprem19.xls | HTTP 200 | 696 KB
+[2026-11-21 00:11:43] 02_scraping_web | Enero 2021 -> ctryprem20.xls | HTTP 200 | 714 KB
+[2026-11-21 00:11:46] 02_scraping_web | Enero 2022 -> ctryprem21.xlsx | HTTP 200 | 272 KB
+[2026-11-21 00:11:48] 02_scraping_web | Enero 2023 -> ctryprem22.xlsx | HTTP 200 | 317 KB
+[2026-11-21 00:11:50] 02_scraping_web | Enero 2024 -> ctryprem23.xlsx | HTTP 200 | 345 KB
+[2026-11-21 00:11:52] 02_scraping_web | Enero 2025 -> ctryprem24.xlsx | HTTP 200 | 365 KB
+[2026-11-21 00:11:56] 02_scraping_web | CRP extraída y validada -> damodaran_crp_anual.csv | 84 filas (2005-2025, 4 países)
+[2026-11-21 00:11:58] 02_scraping_web | Consolidado -> datos_crudos_2024200519L.csv | 2727 filas | {'FRED': 504, 'Banxico': 751, 'BCRP': 248, 'Banco Mundial': 84, 'Yahoo Finance': 1056, 'Damodaran': 84}
+[2026-11-21 00:11:58] 02_scraping_web | === Fin del scraping de Damodaran ===
+[2026-11-21 00:25:48] 03_limpieza_datos | === Inicio de la limpieza y unión de datos ===
+[2026-11-21 00:25:48] 03_limpieza_datos | Python 3.13.18 | pandas 2.2.3 | numpy 2.4.6
+[2026-11-21 00:25:48] 03_limpieza_datos | Lectura datos_crudos_2024200519L.csv | 2727 filas
+[2026-11-21 00:25:48] 03_limpieza_datos | México: 191 meses observados, 61 imputados (última subasta vigente), 3 meses con 2+ subastas (se usa la última)
+[2026-11-21 00:25:48] 03_limpieza_datos | Rango de rend10a por país: {'CHL': {'min': 2.4, 'max': 7.89}, 'COL': {'min': 5.07, 'max': 13.93}, 'MEX': {'min': 4.64, 'max': 10.47}, 'PER': {'min': 3.63, 'max': 9.41}}
+[2026-11-21 00:25:48] 03_limpieza_datos | Rango de crp por país: {'CHL': {'min': 0.68, 'max': 2.1}, 'COL': {'min': 1.8, 'max': 3.9}, 'MEX': {'min': 1.18, 'max': 3.29}, 'PER': {'min': 1.16, 'max': 3.9}}
+[2026-11-21 00:25:48] 03_limpieza_datos | Rango de inflacion por país: {'CHL': {'min': 0.35, 'max': 11.64}, 'COL': {'min': 2.02, 'max': 11.74}, 'MEX': {'min': 2.72, 'max': 7.9}, 'PER': {'min': 1.51, 'max': 8.33}}
+[2026-11-21 00:25:48] 03_limpieza_datos | Rango de depreciacion por país: {'CHL': {'min': -26.86, 'max': 37.05}, 'COL': {'min': -24.97, 'max': 55.82}, 'MEX': {'min': -18.03, 'max': 40.76}, 'PER': {'min': -12.54, 'max': 16.73}}
+[2026-11-21 00:25:48] 03_limpieza_datos | Base procesada -> datos_procesados_2024200519L.csv | 1004 filas x 10 columnas | {'Chile': 252, 'Colombia': 252, 'Mexico': 252, 'Peru': 248}
+[2026-11-21 00:25:48] 03_limpieza_datos | SHA-256 de datos_procesados_2024200519L.csv: 9c36941eaee7bebecfa65bf2f9f522dec1b8c046c69e3d77ff0956e709a7cea5
+[2026-11-21 00:25:48] 03_limpieza_datos | === Fin de la limpieza y unión de datos ===
+[2026-11-21 13:04:58] 04_analisis | === Inicio del análisis ===
+[2026-11-21 13:04:58] 04_analisis | Python 3.13.18 | pandas 2.2.3 | numpy 2.4.6 | statsmodels 0.15.0 | linearmodels 7.1 | matplotlib 3.10.0
+[2026-11-21 13:04:58] 04_analisis | Lectura datos_procesados_2024200519L.csv | 1004 filas
+[2026-11-21 13:04:59] 04_analisis | Descriptivos, correlaciones y VIF guardados | VIF máximo = 1.00
+[2026-11-21 13:04:59] 04_analisis | Raíz unitaria (p-valor Fisher-ADF): {'rend10a': 0.0167, 'crp': 0.0652, 'inflacion': 0.0211, 'depreciacion': 0.0012}
+[2026-11-21 13:09:19] 04_analisis | === Inicio del análisis ===
+[2026-11-21 13:09:19] 04_analisis | Python 3.13.18 | pandas 2.2.3 | numpy 2.4.6 | statsmodels 0.15.0 | linearmodels 7.1 | matplotlib 3.10.0
+[2026-11-21 13:09:19] 04_analisis | Lectura datos_procesados_2024200519L.csv | 1004 filas
+[2026-11-21 13:09:19] 04_analisis | Descriptivos, correlaciones y VIF guardados | VIF máximo = 1.00
+[2026-11-21 13:09:20] 04_analisis | Raíz unitaria (p-valor Fisher-ADF): {'rend10a': 0.0167, 'crp': 0.0652, 'inflacion': 0.0211, 'depreciacion': 0.0012}
+[2026-11-21 13:09:20] 04_analisis | Tablas de modelos y resumen_modelos.txt guardados
+[2026-11-21 13:09:20] 04_analisis | EF D-K | crp: coef = 0.2018, p = 0.3039 -> positivo (esperado)
+[2026-11-21 13:09:20] 04_analisis | EF D-K | inflacion: coef = 0.3437, p = 0.0000 -> positivo (esperado)
+[2026-11-21 13:09:20] 04_analisis | EF D-K | depreciacion: coef = -0.0212, p = 0.0165 -> negativo (contrario al esperado)
+[2026-11-21 13:09:20] 04_analisis | LM Breusch-Pagan (efectos por país): estadístico = 4582.6128, p-valor = 0.0000
+[2026-11-21 13:09:20] 04_analisis | F efectos individuales: estadístico = 143.1633, p-valor = 0.0000
+[2026-11-21 13:09:20] 04_analisis | Breusch-Pagan (heterocedasticidad): estadístico = 76.5192, p-valor = 0.0000
+[2026-11-21 13:09:20] 04_analisis | Wooldridge AR(1): estadístico = 144.2086, p-valor = 0.0000
+[2026-11-21 13:09:20] 04_analisis | Pesaran CD: estadístico = 19.8369, p-valor = 0.0000
+[2026-11-21 13:09:20] 04_analisis | Prueba F sugiere: Efectos fijos. EA y Hausman no estimables (4 países, 4 parámetros). Modelo principal: EF con errores Driscoll-Kraay
+[2026-11-21 13:09:23] 04_analisis | Figuras guardadas en /salidas (figura1 a figura5)
+[2026-11-21 13:09:23] 04_analisis | === Fin del análisis ===
+[2026-11-21 20:47:05] 03_limpieza_datos | === Inicio de la limpieza y unión de datos ===
+[2026-11-21 20:47:05] 03_limpieza_datos | Python 3.13.18 | pandas 2.2.3 | numpy 2.4.6
+[2026-11-21 20:47:05] 03_limpieza_datos | Lectura datos_crudos_2024200519L.csv | 2727 filas
+[2026-11-21 20:47:05] 03_limpieza_datos | México: 191 meses observados, 61 imputados (última subasta vigente), 3 meses con 2+ subastas (se usa la última)
+[2026-11-21 20:47:05] 03_limpieza_datos | Rango de rend10a por país: {'CHL': {'min': 2.4, 'max': 7.89}, 'COL': {'min': 5.07, 'max': 13.93}, 'MEX': {'min': 4.64, 'max': 10.47}, 'PER': {'min': 3.63, 'max': 9.41}}
+[2026-11-21 20:47:05] 03_limpieza_datos | Rango de crp por país: {'CHL': {'min': 0.68, 'max': 2.1}, 'COL': {'min': 1.8, 'max': 3.9}, 'MEX': {'min': 1.18, 'max': 3.29}, 'PER': {'min': 1.16, 'max': 3.9}}
+[2026-11-21 20:47:05] 03_limpieza_datos | Rango de inflacion por país: {'CHL': {'min': 0.35, 'max': 11.64}, 'COL': {'min': 2.02, 'max': 11.74}, 'MEX': {'min': 2.72, 'max': 7.9}, 'PER': {'min': 1.51, 'max': 8.33}}
+[2026-11-21 20:47:05] 03_limpieza_datos | Rango de depreciacion por país: {'CHL': {'min': -26.86, 'max': 37.05}, 'COL': {'min': -24.97, 'max': 55.82}, 'MEX': {'min': -18.03, 'max': 40.76}, 'PER': {'min': -12.54, 'max': 16.73}}
+[2026-11-21 20:47:05] 03_limpieza_datos | Atípicos (regla 3 x RIC por país): 36 identificados y conservados -> salidas/tabla0_atipicos.csv | {('Chile', 'crp'): 12, ('Chile', 'inflacion'): 12, ('Peru', 'inflacion'): 12}
+[2026-11-21 20:47:06] 03_limpieza_datos | Base procesada -> datos_procesados_2024200519L.csv | 1004 filas x 10 columnas | {'Chile': 252, 'Colombia': 252, 'Mexico': 252, 'Peru': 248}
+[2026-11-21 20:47:06] 03_limpieza_datos | SHA-256 de datos_procesados_2024200519L.csv: 9c36941eaee7bebecfa65bf2f9f522dec1b8c046c69e3d77ff0956e709a7cea5
+[2026-11-21 20:47:06] 03_limpieza_datos | === Fin de la limpieza y unión de datos ===
+[2026-11-26 02:01:23] 04_analisis | === Inicio del análisis ===
+[2026-11-26 02:01:23] 04_analisis | Python 3.13.18 | pandas 2.2.3 | numpy 2.4.6 | statsmodels 0.15.0 | linearmodels 7.1 | matplotlib 3.10.0
+[2026-11-26 02:01:24] 04_analisis | Lectura datos_procesados_2024200519L.csv | 1004 filas
+[2026-11-26 02:01:25] 04_analisis | Descriptivos, correlaciones y VIF guardados | VIF máximo = 1.00
+[2026-11-26 02:01:25] 04_analisis | Raíz unitaria (p-valor Fisher-ADF): {'rend10a': 0.0167, 'crp': 0.0652, 'inflacion': 0.0211, 'depreciacion': 0.0012}
+[2026-11-26 02:01:26] 04_analisis | Tablas de modelos y resumen_modelos.txt guardados
+[2026-11-26 02:01:26] 04_analisis | EF D-K | crp: coef = 0.2018, p = 0.3039 -> positivo (esperado)
+[2026-11-26 02:01:26] 04_analisis | EF D-K | inflacion: coef = 0.3437, p = 0.0000 -> positivo (esperado)
+[2026-11-26 02:01:26] 04_analisis | EF D-K | depreciacion: coef = -0.0212, p = 0.0165 -> negativo (contrario al esperado)
+[2026-11-26 02:01:27] 04_analisis | LM Breusch-Pagan (efectos por país): estadístico = 4582.6128, p-valor = 0.0000
+[2026-11-26 02:01:27] 04_analisis | F efectos individuales: estadístico = 143.1633, p-valor = 0.0000
+[2026-11-26 02:01:27] 04_analisis | Breusch-Pagan (heterocedasticidad): estadístico = 76.5192, p-valor = 0.0000
+[2026-11-26 02:01:27] 04_analisis | Wooldridge AR(1): estadístico = 144.2086, p-valor = 0.0000
+[2026-11-26 02:01:27] 04_analisis | Pesaran CD: estadístico = 19.8369, p-valor = 0.0000
+[2026-11-26 02:01:27] 04_analisis | Prueba F sugiere: Efectos fijos. EA y Hausman no estimables (4 países, 4 parámetros). Modelo principal: EF con errores Driscoll-Kraay
+[2026-11-26 02:01:31] 04_analisis | Figuras guardadas en /salidas (figura1 a figura8)
+[2026-11-26 02:01:31] 04_analisis | === Fin del análisis ===
+[2026-11-26 03:25:00] 04_analisis | === Inicio del análisis ===
+[2026-11-26 03:25:02] 04_analisis | Python 3.13.18 | pandas 2.2.3 | numpy 2.4.6 | statsmodels 0.15.0 | linearmodels 7.1 | matplotlib 3.10.0
+[2026-11-26 03:25:03] 04_analisis | Lectura datos_procesados_2024200519L.csv | 1004 filas
+[2026-11-26 03:25:06] 04_analisis | Descriptivos, correlaciones y VIF guardados | VIF máximo = 1.00
+[2026-11-26 03:25:07] 04_analisis | Raíz unitaria (p-valor Fisher-ADF): {'rend10a': 0.0167, 'crp': 0.0652, 'inflacion': 0.0211, 'depreciacion': 0.0012}
+[2026-11-26 03:25:09] 04_analisis | Tablas de modelos y resumen_modelos.txt guardados
+[2026-11-26 03:25:09] 04_analisis | EF D-K | crp: coef = 0.2018, p = 0.3039 -> positivo (esperado)
+[2026-11-26 03:25:09] 04_analisis | EF D-K | inflacion: coef = 0.3437, p = 0.0000 -> positivo (esperado)
+[2026-11-26 03:25:09] 04_analisis | EF D-K | depreciacion: coef = -0.0212, p = 0.0165 -> negativo (contrario al esperado)
+[2026-11-26 03:25:10] 04_analisis | LM Breusch-Pagan (efectos por país): estadístico = 4582.6128, p-valor = 0.0000
+[2026-11-26 03:25:10] 04_analisis | F efectos individuales: estadístico = 143.1633, p-valor = 0.0000
+[2026-11-26 03:25:10] 04_analisis | Breusch-Pagan (heterocedasticidad): estadístico = 76.5192, p-valor = 0.0000
+[2026-11-26 03:25:10] 04_analisis | Wooldridge AR(1): estadístico = 144.2086, p-valor = 0.0000
+[2026-11-26 03:25:10] 04_analisis | Pesaran CD: estadístico = 19.8369, p-valor = 0.0000
+[2026-11-26 03:25:10] 04_analisis | Prueba F sugiere: Efectos fijos. EA y Hausman no estimables (4 países, 4 parámetros). Modelo principal: EF con errores Driscoll-Kraay
+[2026-11-26 03:25:10] 04_analisis | Modelos por país (Newey-West, 4 rezagos) guardados | Homogeneidad: F(9, 988) = 18.6538, p = 0.0000
+[2026-11-26 03:25:21] 04_analisis | Figuras guardadas en /salidas (figura1 a figura9)
+[2026-11-26 03:25:21] 04_analisis | === Fin del análisis ===
+[2026-11-27 13:38:06] 04_analisis | === Inicio del análisis ===
+[2026-11-27 13:38:07] 04_analisis | Python 3.13.18 | pandas 2.2.3 | numpy 2.4.6 | statsmodels 0.15.0 | linearmodels 7.1 | matplotlib 3.10.0
+[2026-11-27 13:38:08] 04_analisis | Lectura datos_procesados_2024200519L.csv | 1004 filas
+[2026-11-27 13:38:10] 04_analisis | Descriptivos, correlaciones y VIF guardados | VIF máximo = 1.00
+[2026-11-27 13:38:11] 04_analisis | Raíz unitaria (p-valor Fisher-ADF): {'rend10a': 0.0167, 'crp': 0.0652, 'inflacion': 0.0211, 'depreciacion': 0.0012}
+[2026-11-27 13:38:13] 04_analisis | Tablas de modelos y resumen_modelos.txt guardados
+[2026-11-27 13:38:13] 04_analisis | EF D-K | crp: coef = 0.2018, p = 0.3039 -> positivo (esperado)
+[2026-11-27 13:38:13] 04_analisis | EF D-K | inflacion: coef = 0.3437, p = 0.0000 -> positivo (esperado)
+[2026-11-27 13:38:13] 04_analisis | EF D-K | depreciacion: coef = -0.0212, p = 0.0165 -> negativo (contrario al esperado)
+[2026-11-27 13:38:14] 04_analisis | LM Breusch-Pagan (efectos por país): estadístico = 4582.6128, p-valor = 0.0000
+[2026-11-27 13:38:14] 04_analisis | F efectos individuales: estadístico = 143.1633, p-valor = 0.0000
+[2026-11-27 13:38:14] 04_analisis | Breusch-Pagan (heterocedasticidad): estadístico = 76.5192, p-valor = 0.0000
+[2026-11-27 13:38:14] 04_analisis | Wooldridge AR(1): estadístico = 144.2086, p-valor = 0.0000
+[2026-11-27 13:38:14] 04_analisis | Pesaran CD: estadístico = 19.8369, p-valor = 0.0000
+[2026-11-27 13:38:14] 04_analisis | Prueba F sugiere: Efectos fijos. EA y Hausman no estimables (4 países, 4 parámetros). Modelo principal: EF con errores Driscoll-Kraay
+[2026-11-27 13:38:15] 04_analisis | Modelos por país (Newey-West, 4 rezagos) guardados | Homogeneidad: F(9, 988) = 18.6538, p = 0.0000
+[2026-11-27 13:38:15] 04_analisis | Robustez: EF país y mes, Newey-West 12 rezagos y homogeneidad robusta guardados | Wald chi2(9) = 61.2791, p = 0.0000
+[2026-11-27 13:38:24] 04_analisis | Figuras guardadas en /salidas (figura1 a figura9)
+[2026-11-27 13:38:24] 04_analisis | === Fin del análisis ===
